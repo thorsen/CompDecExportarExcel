@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.1" xmlns:af="http://xmlns.oracle.com/adf/faces/rich">
+  <jsp:directive.page contentType="text/html;charset=UTF-8"/>
+  <af:componentDef var="attrs" componentVar="component">
+    <af:commandButton id="dc_cb1" text="#{attrs.txtBoton}">
+      <af:fileDownloadActionListener filename="#{attrs.ficheroDestino}" contentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                     method="#{ExportarExcelBean.exportarExcel}"/>
+    </af:commandButton>
+    <af:xmlContent>
+      <component xmlns="http://xmlns.oracle.com/adf/faces/rich/component">
+        <display-name>CompDecExportarExcel</display-name>
+        <component-class>es.ramondin.compdec.exportarexcel.view.component.CompDecExportarExcel</component-class>
+        <attribute>
+          <description>Especifica el texto que se mostrará en el botón.</description>
+          <attribute-name>txtBoton</attribute-name>
+          <attribute-class>java.lang.String</attribute-class>
+          <default-value>Exportar a Excel</default-value>
+        </attribute>
+        <attribute>
+          <description>Especifica el id de la tabla a exportar.</description>
+          <attribute-name>idTabla</attribute-name>
+          <attribute-class>java.lang.String</attribute-class>
+        </attribute>
+        <attribute>
+          <description>Especifica el nombre del fichero generado en la exportación.</description>
+          <attribute-name>ficheroDestino</attribute-name>
+          <attribute-class>java.lang.String</attribute-class>
+          <default-value>excel.xlsx</default-value>
+        </attribute>
+        <attribute>
+          <description>Especifica el nombre de la hoja del fichero Excel.</description>
+          <attribute-name>nombreHoja</attribute-name>
+          <attribute-class>java.lang.String</attribute-class>
+        </attribute>
+        <attribute>
+          <description>Especifica si se exportarán o no las columnas ocultas.</description>
+          <attribute-name>mostrarColsOcultas</attribute-name>
+          <attribute-class>java.lang.Boolean</attribute-class>
+          <default-value>false</default-value>
+        </attribute>
+        <component-extension>
+          <component-tag-namespace>es.ramondin.compdec.exportarexcel.view.component</component-tag-namespace>
+          <component-taglib-uri>/ExportarExcelLib</component-taglib-uri>
+        </component-extension>
+      </component>
+    </af:xmlContent>
+  </af:componentDef>
+</jsp:root>
