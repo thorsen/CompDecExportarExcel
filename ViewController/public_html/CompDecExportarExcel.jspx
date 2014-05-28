@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.1" xmlns:af="http://xmlns.oracle.com/adf/faces/rich">
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" version="2.1" xmlns:af="http://xmlns.oracle.com/adf/faces/rich" xmlns:c="http://java.sun.com/jsp/jstl/core">
+  <c:set var="viewcontrollerBundle" value="#{adfBundle['es.ramondin.compdec.exportarexcel.view.resources.ViewControllerBundle']}"/>
   <jsp:directive.page contentType="text/html;charset=UTF-8"/>
   <af:componentDef var="attrs" componentVar="component">
     <af:commandButton id="dc_cb1" text="#{attrs.txtBoton}">
@@ -14,7 +15,7 @@
           <description>Especifica el texto que se mostrará en el botón.</description>
           <attribute-name>txtBoton</attribute-name>
           <attribute-class>java.lang.String</attribute-class>
-          <default-value>Exportar a Excel</default-value>
+          <default-value>#{viewcontrollerBundle.EXPORTAR_A_EXCEL}</default-value>
         </attribute>
         <attribute>
           <description>Especifica el id de la tabla a exportar.</description>
