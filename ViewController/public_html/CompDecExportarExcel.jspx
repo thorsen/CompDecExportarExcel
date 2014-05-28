@@ -3,7 +3,7 @@
   <c:set var="viewcontrollerBundle" value="#{adfBundle['es.ramondin.compdec.exportarexcel.view.resources.ViewControllerBundle']}"/>
   <jsp:directive.page contentType="text/html;charset=UTF-8"/>
   <af:componentDef var="attrs" componentVar="component">
-    <af:commandButton id="dc_cb1" text="#{attrs.txtBoton}">
+    <af:commandButton id="dc_cb1" text="#{attrs.txtBoton != null ? attrs.txtBoton : viewcontrollerBundle.EXPORTAR_A_EXCEL}">
       <af:fileDownloadActionListener filename="#{attrs.ficheroDestino}" contentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                                      method="#{ExportarExcelBean.exportarExcel}"/>
     </af:commandButton>
@@ -15,7 +15,6 @@
           <description>Especifica el texto que se mostrará en el botón.</description>
           <attribute-name>txtBoton</attribute-name>
           <attribute-class>java.lang.String</attribute-class>
-          <default-value>#{viewcontrollerBundle.EXPORTAR_A_EXCEL}</default-value>
         </attribute>
         <attribute>
           <description>Especifica el id de la tabla a exportar.</description>
