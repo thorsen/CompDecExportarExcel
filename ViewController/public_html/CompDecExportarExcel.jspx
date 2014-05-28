@@ -3,7 +3,7 @@
   <c:set var="viewcontrollerBundle" value="#{adfBundle['es.ramondin.compdec.exportarexcel.view.resources.ViewControllerBundle']}"/>
   <jsp:directive.page contentType="text/html;charset=UTF-8"/>
   <af:componentDef var="attrs" componentVar="component">
-    <af:commandButton id="dc_cb1" text="#{attrs.txtBoton != null ? attrs.txtBoton : viewcontrollerBundle.EXPORTAR_A_EXCEL}">
+    <af:commandButton id="dc_cb1" text="#{!empty attrs.txtBoton ? attrs.txtBoton : viewcontrollerBundle.EXPORTAR_A_EXCEL}">
       <af:fileDownloadActionListener filename="#{attrs.ficheroDestino}" contentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                                      method="#{ExportarExcelBean.exportarExcel}"/>
     </af:commandButton>
