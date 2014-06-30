@@ -8,6 +8,8 @@ import es.ramondin.utilidades.JSFUtils;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import java.util.ArrayList;
+
 import javax.faces.component.UIViewRoot;
 import javax.faces.context.FacesContext;
 
@@ -23,11 +25,23 @@ public class ExportarExcelBean {
         String idTabla = (String)JSFUtils.resolveExpression("#{attrs.idTabla}");
         String nombreHoja = (String)JSFUtils.resolveExpression("#{attrs.nombreHoja}");
         Boolean mostrarColsOcultas = (Boolean)JSFUtils.resolveExpression("#{attrs.mostrarColsOcultas}");
+        Integer[] columnasFechaRMD = (Integer[])JSFUtils.resolveExpression("#{attrs.arrayColumnasFechaRMD}");
         
+        ArrayList<Integer> columnasFecRMD = null;
+        
+        int numColumnas = columnasFechaRMD != null ? columnasFechaRMD.length : 0;
+        
+        if (numColumnas > 0) {
+            columnasFecRMD = new ArrayList<Integer>();
+        
+            for (int i = 0; i < numColumnas; i++)
+                columnasFecRMD.add(columnasFechaRMD[i]);
+        }
+
         UIViewRoot vr = facesContext.getViewRoot();
         RichTable tabla = (RichTable)vr.findComponent(idTabla);
         
-        XSSFWorkbook wb = ExportarExcelUtil.generarExcel(facesContext, tabla, nombreHoja, mostrarColsOcultas);
+        XSSFWorkbook wb = ExportarExcelUtil.generarExcel(facesContext, tabla, nombreHoja, mostrarColsOcultas, columnasFecRMD);
 
         try {
             wb.write(outputStream);

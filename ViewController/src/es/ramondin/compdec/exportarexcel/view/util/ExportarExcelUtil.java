@@ -6,9 +6,16 @@ import java.awt.Color;
 
 import java.lang.reflect.Field;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+
+import java.util.Map;
 
 import javax.el.ELContext;
 import javax.el.ExpressionFactory;
@@ -30,6 +37,7 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFDataFormat;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -90,15 +98,24 @@ public class ExportarExcelUtil {
 
         return res;
     }
+    
+    private static void aplicaColor(XSSFCell celda, XSSFCellStyle celdaStyle, Color color) {
+        celdaStyle.setFillPattern(XSSFCellStyle.SOLID_FOREGROUND);
+        celdaStyle.setFillForegroundColor(new XSSFColor(color));
+        celdaStyle.setFillBackgroundColor(new XSSFColor(color));
+        celda.setCellStyle(celdaStyle);
+    }
 
-    public static XSSFWorkbook generarExcel(FacesContext facesContext, RichTable tabla, String nombreHoja,
-                                                             Boolean mostrarColsOcultas) {
+    public static XSSFWorkbook generarExcel(FacesContext facesContext, RichTable tabla, String nombreHoja, Boolean mostrarColsOcultas, ArrayList<Integer> columnasFecRMD) {
         XSSFWorkbook libro = new XSSFWorkbook();
 
         XSSFSheet hoja = libro.createSheet(WorkbookUtil.createSafeSheetName(nombreHoja));
         XSSFRow fila;
         XSSFCell celda;
         XSSFCellStyle celdaStyle;
+        XSSFFont defaultFont = libro.createFont();
+        XSSFFont defaultFontBold = libro.createFont();
+        defaultFontBold.setBold(true);
 
         List<RichColumn> cols = new ArrayList<RichColumn>();
         RichColumn col;
@@ -116,13 +133,19 @@ public class ExportarExcelUtil {
             col = cols.get(i);
 
             celda = fila.createCell(i);
+            celdaStyle = libro.createCellStyle();
+            
+            celdaStyle.setFont(defaultFontBold);
+            celdaStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+            
+            celda.setCellStyle(celdaStyle);
             celda.setCellValue(StringUtils.defaultString(col.getHeaderText()));
         }
         hoja.createFreezePane(0, 1, 0, 1);
 
         ELContext elContext = facesContext.getELContext();
         ExpressionFactory expressionFactory = facesContext.getApplication().getExpressionFactory();
-/*        try {
+        /*        try {
             if (StringUtils.isNotEmpty(tabla.getVarStatus())) {
                 // create varStatusMap (this is the only way I have found, if you have another solution be my guest :))
                 Method m;
@@ -145,6 +168,11 @@ public class ExportarExcelUtil {
         //Filas
         CollectionModel model = (CollectionModel)tabla.getValue();
         int rowcount = model.getRowCount();
+        boolean esFechaRMD = false;
+        SimpleDateFormat sdfFormato = new SimpleDateFormat("yyyyMMdd");
+        String fechaRMDTxt = null;
+        Date fechaRMD = null;
+               
         for (int i = 0; i < rowcount; i++) {
             model.setRowIndex(i);
 
@@ -162,19 +190,29 @@ public class ExportarExcelUtil {
                 celdaStyle = libro.createCellStyle();
 
                 ValueExpression inlineStyleVE = col.getValueExpression("inlineStyle");
+                ValueExpression styleClassVE = col.getValueExpression("styleClass");
                 ValueExpression alignVE = col.getValueExpression("align");
                 String style = inlineStyleVE == null ? "" : (String)inlineStyleVE.getValue(facesContext.getELContext());
+                String styleClass = styleClassVE == null ? "" : (String)styleClassVE.getValue(facesContext.getELContext());
                 String align = alignVE == null ? "" : (String)alignVE.getValue(facesContext.getELContext());
 
                 //Tratamos los estilos
+                Color colorEstilo = null;
+                
+                if (styleClass.contentEquals("AFTableCellSubtotal")) {
+                    colorEstilo = RmdColor.decode("#B3C6DB");
+                    celdaStyle.setFont(defaultFontBold);
+                }                
+                
+                if (colorEstilo != null) {
+                    aplicaColor(celda, celdaStyle, colorEstilo);
+                }
+                
                 HashMap<String, String> mapStyle = getMapaEstilos(style);
                 Color color = getColor(mapStyle, "background-color");
-
+                
                 if (color != null) {
-                    celdaStyle.setFillPattern(XSSFCellStyle.SOLID_FOREGROUND);
-                    celdaStyle.setFillForegroundColor(new XSSFColor(color));
-                    celdaStyle.setFillBackgroundColor(new XSSFColor(color));
-                    celda.setCellStyle(celdaStyle);
+                    aplicaColor(celda, celdaStyle, color);
                 }
 
                 if (align != null) {
@@ -185,12 +223,28 @@ public class ExportarExcelUtil {
                     else if (align.contentEquals("center"))
                         celdaStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
                 }
+                
+                esFechaRMD = (columnasFecRMD != null && columnasFecRMD.contains(j));
 
                 for (UIComponent c : col.getChildren()) {
                     if (c instanceof UIXValue) {
                         UIXValue uixValue = (UIXValue)c;
                         if (uixValue.getValue() != null) {
-                            if (uixValue.getValue() instanceof Number) {
+                            if (esFechaRMD) {
+                                XSSFDataFormat poiFormat = libro.createDataFormat();
+                                celdaStyle.setDataFormat(poiFormat.getFormat("dd/MM/yyyy"));
+                                celda.setCellStyle(celdaStyle);
+                                fechaRMDTxt = uixValue.getValue().toString();
+
+                                try {
+                                    if (!fechaRMDTxt.contentEquals("0")) {
+                                        fechaRMD = sdfFormato.parse(fechaRMDTxt);
+                                        celda.setCellValue(new java.sql.Date(fechaRMD.getTime()));
+                                    }
+                                } catch (ParseException e) {
+                                    e.getMessage();
+                                }
+                            } else if (uixValue.getValue() instanceof Number) {
                                 celda.setCellType(XSSFCell.CELL_TYPE_NUMERIC);
                                 //XSSFDataFormat poiFormat = wb.createDataFormat();
                                 //cellStyle.setDataFormat(poiFormat.getFormat("##0.00"));

@@ -38,6 +38,11 @@
           <attribute-class>java.lang.Boolean</attribute-class>
           <default-value>false</default-value>
         </attribute>
+        <attribute>
+          <description>Especifica el array columnas que deben ser tratadas como fechas RMD.</description>
+          <attribute-name>arrayColumnasFechaRMD</attribute-name>
+          <attribute-class>oracle.jbo.domain.Array</attribute-class>
+        </attribute>
         <component-extension>
           <component-tag-namespace>es.ramondin.compdec.exportarexcel.view.component</component-tag-namespace>
           <component-taglib-uri>/ExportarExcelLib</component-taglib-uri>
